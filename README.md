@@ -1,4 +1,4 @@
-# world-finance
+# world-finances
 
 ## Project setup
 ```
