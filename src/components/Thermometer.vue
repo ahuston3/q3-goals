@@ -62,7 +62,7 @@
                     </div>
                     
                     <div class="bulb" :class="{'is-active': tempValid}">
-                        <img alt="World Finance" src=".././assets/logo.svg" class="world-logo">
+                        <img alt="World Finance" src=".././assets/logo.png" class="world-logo">
                     </div>
                     <span class="bulb-shadow"></span>
                 </div>
