@@ -2,7 +2,7 @@
     <div class="container">
         <div class="totals">
             <div class="input-group">
-                <span>Branch</span>
+                <span>Title</span>
                 <input type="text" v-model="branchName" class="input">
             </div>
             <div class="input-group">
@@ -21,7 +21,6 @@
             </div>
             <div>
                 <button @click="saveToPDF" class="button">Save to PDF</button>
-                <button onclick="window.print();" class="button button-print">Print</button>
             </div>
         </div>
         <div class="main" id="main">
@@ -62,7 +61,7 @@
                     </div>
                     
                     <div class="bulb" :class="{'is-active': tempValid}">
-                        <img alt="World Finance" src=".././assets/logo.svg" class="world-logo">
+                        <img alt="World Finance" src=".././assets/logo.png" class="world-logo">
                     </div>
                     <span class="bulb-shadow"></span>
                 </div>
@@ -180,7 +179,7 @@ export default {
                 const imgProps= pdf.getImageProperties(imgData);
                 const pdfWidth = pdf.internal.pageSize.getWidth();
                 const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-                pdf.addImage(imgData, 'PNG', 10, 20, pdfWidth, pdfHeight);
+                pdf.addImage(imgData, 'PNG', 30, 40, (pdfWidth * .75), (pdfHeight * .75));
                 pdf.save('World Finance Ledger.pdf');
             });
         },
@@ -414,7 +413,7 @@ export default {
 }
 
 .tick-amount.is-brand {
-    color: #002256;
+    color: #2361ae;
     font-family: 'Mohr Rounded SemiBold';
 }
 
