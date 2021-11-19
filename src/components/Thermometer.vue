@@ -174,12 +174,13 @@ export default {
             .then((canvas) => {
                 const imgData = canvas.toDataURL('image/png');
                 const pdf = new jsPDF({
-                orientation: 'portrait',
+                    orientation: 'portrait',
+                    format: [612, 792]
                 });
                 const imgProps= pdf.getImageProperties(imgData);
                 const pdfWidth = pdf.internal.pageSize.getWidth();
                 const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-                pdf.addImage(imgData, 'PNG', 30, 40, (pdfWidth * .75), (pdfHeight * .75));
+                pdf.addImage(imgData, 'PNG', 150, 150, (pdfWidth * .62), (pdfHeight * .62));
                 pdf.save('World Finance Ledger.pdf');
             });
         },
