@@ -70,7 +70,7 @@
                         <span class="content-total current-branch">{{ branchName }}</span>
                         <span class="content-title">Goal:</span>
                         <span class="content-total current-goal">{{ abbreviateNumber(total, true) }}</span>
-                        <span class="content-title">Current ledger:</span>
+                        <span class="content-title">Current status:</span>
                         <span :class="{ 'goal-met' :goalMet }" class="content-total current-ledger">{{ currency(amount, '$', 0) }}</span>
                     </div>
                 </div>
