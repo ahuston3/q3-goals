@@ -43,12 +43,12 @@
                     <div class="tick"></div>
 
                     <div v-if="total" class="tick-active" style="height: 100%">
-                        <span class="tick-amount">{{ abbreviateNumber(total) }}</span>
+                        <span class="tick-amount">{{ displayValue(total) }}</span>
                         <div class="tick tick-current"></div>
                     </div>
 
                     <div v-if="tempValid" class="tick-active" :style="`height: ${tempHeight}%`">
-                        <span class="tick-amount is-brand">{{ abbreviateNumber(amount) }}</span>
+                        <span class="tick-amount is-brand">{{ displayValue(amount) }}</span>
                         <div class="tick tick-current is-brand"></div>
                     </div>
                 </div>
@@ -69,9 +69,9 @@
                     <div>
                         <span class="content-total current-branch">{{ branchName }}</span>
                         <span class="content-title">Goal:</span>
-                        <span class="content-total current-goal">{{ abbreviateNumber(total, true) }}</span>
-                        <span class="content-title">Current ledger:</span>
-                        <span :class="{ 'goal-met' :goalMet }" class="content-total current-ledger">{{ currency(amount, '$', 0) }}</span>
+                        <span class="content-total current-goal">{{ displayValue(total) }}</span>
+                        <span class="content-title">Current status:</span>
+                        <span :class="{ 'goal-met' :goalMet }" class="content-total current-ledger">{{ displayValue(amount) }}</span>
                     </div>
                 </div>
             </div>
@@ -110,7 +110,7 @@ export default {
         },
         goalMet() {
             return this.total && this.amount && (this.amount >= this.total);
-        }
+        },
     },
     watch: {
         branchName: _debounce(function () {
@@ -201,7 +201,17 @@ export default {
             }
 
             localStorage.setItem('settings', JSON.stringify(settings));
-        }
+        },
+        displayValue(value) {
+            if (value === 0 || value > 0) {
+                if (this.focused) {
+                    return value.toString();
+                } else {
+                    return parseFloat(value).toFixed(0).replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1,');
+                }
+            }
+            return null;
+        },
     }
 }
 </script>
