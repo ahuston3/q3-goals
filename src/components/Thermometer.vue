@@ -7,16 +7,18 @@
             </div>
             <div class="input-group">
                 <span>Goal</span>
-                <currency-input
+                <input
                     v-model="total"
                     class="input"
+                    type="number"
                 />
             </div>
             <div class="input-group">
                 <span>Current</span>
-                <currency-input
+                <input
                     v-model="amount"
                     class="input"
+                    type="number"
                 />
             </div>
             <div>
@@ -82,15 +84,10 @@
 <script>
 import { jsPDF } from "jspdf";
 import * as html2canvas from 'html2canvas';
-import CurrencyInput from './CurrencyInput.vue';
+// import CurrencyInput from './CurrencyInput.vue';
 import _debounce from 'lodash/debounce';
 
 export default {
-    components: { CurrencyInput },
-        name: 'HelloWorld',
-        props: {
-        msg: String
-    },
     data() {
         return {
             branchName: '',
@@ -207,7 +204,7 @@ export default {
                 if (this.focused) {
                     return value.toString();
                 } else {
-                    return parseFloat(value).toFixed(0).replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1,');
+                    return parseFloat(value).toFixed(2).replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1,');
                 }
             }
             return null;

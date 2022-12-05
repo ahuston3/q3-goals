@@ -1,5 +1,5 @@
 <template>
-    <input :value="displayValue" type="text" inputmode="decimal" class="input" @input="updateValue" @blur="focused = false" @focus="focused = true">
+    <input :value="displayValue" type="number" inputmode="decimal" class="input" @input="updateValue" @blur="focused = false" @focus="focused = true">
 </template>
 
 <script>
@@ -22,7 +22,7 @@ export default {
                 if (this.focused) {
                     return this.value.toString();
                 } else {
-                    return parseFloat(this.value).toFixed(0).replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1,');
+                    return parseFloat(this.value).toFixed(2).replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1,');
                 }
             }
             return null;
