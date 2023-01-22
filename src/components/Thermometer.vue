@@ -6,6 +6,18 @@
                 <input type="text" v-model="branchName" class="input">
             </div>
             <div class="input-group">
+                <span>Unit</span>
+                <select class="select" v-model="units" id="">
+                    <option :value="null">None</option>
+                    <option value="$">$</option>
+                    <option value="%">%</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <span>YoY</span>
+                <input type="checkbox" v-model="yearOverYear" class="input">
+            </div>
+            <div class="input-group">
                 <span>Goal</span>
                 <input
                     v-model="total"
@@ -17,6 +29,14 @@
                 <span>Current</span>
                 <input
                     v-model="amount"
+                    class="input"
+                    type="number"
+                />
+            </div>
+            <div v-if="yearOverYear" class="input-group">
+                <span>Last Year</span>
+                <input
+                    v-model="secondaryAmount"
                     class="input"
                     type="number"
                 />
@@ -53,16 +73,24 @@
                         <span class="tick-amount is-brand">{{ displayValue(amount) }}</span>
                         <div class="tick tick-current is-brand"></div>
                     </div>
+
+                    <div v-if="tempLastYearValid && yearOverYear" class="tick-active" :style="`height: ${tempLastYearHeight}%`">
+                        <span class="tick-amount is-brand is-secondary">{{ displayValue(secondaryAmount) }}</span>
+                        <div class="tick tick-current is-brand"></div>
+                    </div>
                 </div>
 
                 <div class="thermometer">
                     <div class="tube-container">
-                        <div v-if="tempValid" class="tube" :style="`height: ${tempHeight}%`">
+                        <div v-if="tempValid" :class="{'is-half' :yearOverYear}" class="tube" :style="`height: ${tempHeight}%`">
+
+                        </div>
+                        <div v-if="tempLastYearValid && yearOverYear" class="tube is-secondary" :style="`height: ${tempLastYearHeight}%`">
 
                         </div>
                     </div>
                     
-                    <div class="bulb" :class="{'is-active': tempValid}">
+                    <div class="bulb" :class="{'is-active': tempValid, 'is-secondary' :yearOverYear}">
                         <img alt="World Finance" src=".././assets/logo.png" class="world-logo">
                     </div>
                     <span class="bulb-shadow"></span>
@@ -72,6 +100,8 @@
                         <span class="content-total current-branch">{{ branchName }}</span>
                         <span class="content-title">Goal:</span>
                         <span class="content-total current-goal">{{ displayValue(total) }}</span>
+                        <span v-if="yearOverYear" class="content-title">Last year status:</span>
+                        <span v-if="yearOverYear" :class="{ 'goal-met' :lastYearGoalMet }" class="content-total current-ledger last-year-ledger">{{ displayValue(secondaryAmount) }}</span>
                         <span class="content-title">Current status:</span>
                         <span :class="{ 'goal-met' :goalMet }" class="content-total current-ledger">{{ displayValue(amount) }}</span>
                     </div>
@@ -84,15 +114,17 @@
 <script>
 import { jsPDF } from "jspdf";
 import * as html2canvas from 'html2canvas';
-// import CurrencyInput from './CurrencyInput.vue';
 import _debounce from 'lodash/debounce';
 
 export default {
     data() {
         return {
             branchName: '',
+            units: null,
+            yearOverYear: false,
             amount: 0,
             total: 0,
+            secondaryAmount: 0,
         }
     },
     created() {
@@ -105,8 +137,17 @@ export default {
         tempValid() {
             return this.tempHeight > 0;
         },
+        tempLastYearHeight() {
+            return (this.secondaryAmount/this.total)*100;
+        },
+        tempLastYearValid() {
+            return this.tempLastYearHeight > 0;
+        },
         goalMet() {
-            return this.total && this.amount && (this.amount >= this.total);
+            return this.total && this.amount && (parseFloat(this.amount) >= parseFloat(this.total));
+        },
+        lastYearGoalMet() {
+            return this.total && this.secondaryAmount && (parseFloat(this.secondaryAmount) >= parseFloat(this.total));
         },
     },
     watch: {
@@ -118,7 +159,16 @@ export default {
         }, 1000),
         total: _debounce(function () {
             this.saveToLocalStorage();
-        }, 1000)
+        }, 1000),
+        units: _debounce(function () {
+            this.saveToLocalStorage();
+        }, 1000),
+        secondaryAmount: _debounce(function () {
+            this.saveToLocalStorage();
+        }, 1000),
+        yearOverYear: _debounce(function () {
+            this.saveToLocalStorage();
+        }, 1000),
     },
     methods: {
         abbreviateNumber(value, full) {
@@ -188,6 +238,9 @@ export default {
                 this.branchName = settings.branchName;
                 this.amount = settings.amount;
                 this.total = settings.total;
+                this.units = settings.units;
+                this.secondaryAmount = settings.secondaryAmount;
+                this.yearOverYear = settings.yearOverYear;
             }
         },
         saveToLocalStorage () {
@@ -195,17 +248,31 @@ export default {
                 branchName: this.branchName,
                 amount: this.amount,
                 total: this.total,
+                units: this.units,
+                secondaryAmount: this.secondaryAmount,
+                yearOverYear: this.yearOverYear,
             }
 
             localStorage.setItem('settings', JSON.stringify(settings));
         },
         displayValue(value) {
             if (value === 0 || value > 0) {
+                let amount;
+
                 if (this.focused) {
-                    return value.toString();
+                    amount = value.toString();
                 } else {
-                    return parseFloat(value).toFixed(0).replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1,');
+                    amount = parseFloat(value).toFixed(0).replace(/(\d)(?=(\d{3})+(?:\.\d+)?$)/g, '$1,');
                 }
+
+                if (this.units === '$') {
+                    return `${this.units}${amount}`;
+                } else if (this.units === '%'){
+                    return `${amount}${this.units}`;
+                } else {
+                    return amount;
+                }
+                
             }
             return null;
         },
@@ -249,7 +316,7 @@ export default {
 .main-wrapper {
     display: flex;
     padding-bottom: 100px;
-    padding-left: 60px;
+    padding-left: 150px;
     background-color: #fff;
     z-index: 1;
     transform: scale(0.65);
@@ -289,12 +356,16 @@ export default {
     opacity: 0.75;
 }
 
-.input {
+.input, .select {
     padding: 10px;
     font-size: 16px;
     border-radius: 5px;
     border: 1px solid #ccc;
     background-color: #f5fcff;
+}
+
+.select {
+    flex-grow: 1;
 }
 
 .input-group {
@@ -306,7 +377,7 @@ export default {
 }
 
 .input-group span {
-    width: 70px;
+    width: 100px;
 }
 
 .content-total {
@@ -355,6 +426,19 @@ export default {
     linear-gradient(#44a3db, #2262ae) padding-box,
     linear-gradient(to right, #44a3db, #2262ae) border-box;
     z-index: -1;
+}
+
+.last-year-ledger {
+    margin-bottom: 0.5em;
+    color: #002256;
+    padding-top: 0;
+    padding-left: 0;
+    text-align: left;
+    left: 0;
+}
+
+.last-year-ledger:after {
+    display: none;
 }
 
 .current-ledger.goal-met:after {
@@ -425,6 +509,10 @@ export default {
     font-family: 'Mohr Rounded SemiBold';
 }
 
+.tick-amount.is-secondary {
+    color: #002256;
+}
+
 .thermometer {
     height: 550px;
     width: 52px;
@@ -491,6 +579,18 @@ export default {
     background: linear-gradient(90deg, #21548d 0%, #235791 50%, #26609f 100%);
 }
 
+.tube.is-half {
+    width: 50%;
+    left: auto;
+}
+
+.tube.is-secondary {
+    width: 50%;
+    right: auto;
+    left: 0;
+    background: #002256;
+}
+
 span {
     padding: 10px;
 }
@@ -551,6 +651,10 @@ span {
 
 .bulb.is-active {
     background: linear-gradient(90deg, #21548d 20%, #235791 50%, #26609f 80%);
+}
+
+.bulb.is-secondary {
+    background: linear-gradient(90deg, #002256 49%, #21548d 50%, #21548d 100%);
 }
 
 .world-logo {
